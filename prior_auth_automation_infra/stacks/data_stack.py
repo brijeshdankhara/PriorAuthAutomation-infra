@@ -3,6 +3,7 @@ from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_kms as kms
 from aws_cdk import aws_rds as rds
 from aws_cdk import aws_s3 as s3
+from aws_cdk import aws_secretsmanager as secretsmanager
 from constructs import Construct
 
 
@@ -89,11 +90,32 @@ class DataStack(Stack):
             removal_policy=removal_policy,
         )
 
+        # A separate, least-privilege login for the application at runtime --
+        # distinct from the cluster's master-user secret above, which
+        # migrations use for DDL. The master user is never used at runtime:
+        # even though RDS master users already can't bypass row-level
+        # security, they remain the table owner, and table owners bypass
+        # ordinary GRANT/REVOKE checks (e.g. the audit_event insert-only
+        # restriction) regardless of RLS. Only a non-owner role makes that
+        # restriction real. Migrations create this Postgres role and grant
+        # it exactly the privileges it needs (see the RLS migration).
+        self.app_runtime_secret = secretsmanager.Secret(
+            self,
+            "AppRuntimeSecret",
+            secret_name=f"prior-auth-{stage_name}-app-runtime",
+            generate_secret_string=secretsmanager.SecretStringGenerator(
+                secret_string_template='{"username": "app_runtime"}',
+                generate_string_key="password",
+                exclude_punctuation=True,
+            ),
+        )
+
         # Exported so local tooling (Alembic migrations via the
         # sqlalchemy-aurora-data-api dialect) can reach the cluster through
         # the Data API without needing VPC network access.
         CfnOutput(self, "ClusterArn", value=self.cluster.cluster_arn)
         CfnOutput(self, "ClusterSecretArn", value=self.cluster.secret.secret_arn)
+        CfnOutput(self, "AppRuntimeSecretArn", value=self.app_runtime_secret.secret_arn)
         CfnOutput(self, "DatabaseName", value="priorauth")
         CfnOutput(self, "DocumentsBucketName", value=self.documents_bucket.bucket_name)
         CfnOutput(self, "PolicyDocsBucketName", value=self.policy_docs_bucket.bucket_name)
