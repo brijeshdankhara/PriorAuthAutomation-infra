@@ -75,7 +75,11 @@ class DataStack(Stack):
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_ISOLATED),
             security_groups=[self.db_security_group],
             writer=rds.ClusterInstance.serverless_v2("Writer"),
-            serverless_v2_min_capacity=0.5,
+            # Min capacity 0 lets the cluster pause to near-zero cost after a
+            # period of inactivity -- right for a low-traffic demo. Trade-off:
+            # a cold resume takes tens of seconds on the next request after
+            # a pause, which is fine here but wouldn't be for Prod traffic.
+            serverless_v2_min_capacity=0,
             serverless_v2_max_capacity=2,
             enable_data_api=True,
             storage_encrypted=True,
