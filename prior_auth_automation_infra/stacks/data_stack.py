@@ -1,3 +1,5 @@
+import os
+
 from aws_cdk import CfnOutput, Duration, RemovalPolicy, Stack
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_kms as kms
@@ -34,6 +36,13 @@ class DataStack(Stack):
             removal_policy=removal_policy,
         )
 
+        # Browser uploads go straight to S3 via a presigned PUT, so the
+        # bucket must allow cross-origin PUT from the SPA origin. Beta permits
+        # the local dev server; prod is the CloudFront origin (env-driven).
+        upload_origins = os.environ.get(
+            "SPA_ORIGINS",
+            "http://localhost:5173" if is_beta else "https://app.example.com",
+        ).split(",")
         self.documents_bucket = s3.Bucket(
             self,
             "DocumentsBucket",
@@ -45,6 +54,14 @@ class DataStack(Stack):
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             removal_policy=removal_policy,
             auto_delete_objects=is_beta,
+            cors=[
+                s3.CorsRule(
+                    allowed_methods=[s3.HttpMethods.PUT],
+                    allowed_origins=upload_origins,
+                    allowed_headers=["*"],
+                    max_age=3000,
+                )
+            ],
         )
 
         self.policy_docs_bucket = s3.Bucket(
