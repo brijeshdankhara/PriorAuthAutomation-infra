@@ -2,7 +2,7 @@
 
 > Part of a 4-repo portfolio project: **infra** (this repo) · [backend](https://github.com/brijeshdankhara/PriorAuthAutomation-backend) · [frontend](https://github.com/brijeshdankhara/PriorAuthAutomation-frontend) · [docs](https://github.com/brijeshdankhara/PriorAuthAutomation-docs)
 >
-> This is a portfolio/demo project (synthetic data only, no real patients or providers). Live demo: `www.brijeshdankhara.com/auto-pa-test`.
+> This is a portfolio/demo project (synthetic data only, no real patients or providers). Live demo: `autopa.brijeshdankhara.com` (`brijeshdankhara.com/auto-pa-test` redirects there).
 
 AWS CDK (Python) app for the Prior Authorization Automation Platform — an AI-assisted system that reviews prior-authorization requests against payer criteria and drafts new criteria checklists from payer policy documents. See [docs/ARCHITECTURE.md](https://github.com/brijeshdankhara/PriorAuthAutomation-docs/blob/main/ARCHITECTURE.md) for the full design and [docs/PROMOTION.md](https://github.com/brijeshdankhara/PriorAuthAutomation-docs/blob/main/PROMOTION.md) for the Beta→Prod procedure this repo implements.
 

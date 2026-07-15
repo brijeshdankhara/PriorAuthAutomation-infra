@@ -38,10 +38,12 @@ class DataStack(Stack):
 
         # Browser uploads go straight to S3 via a presigned PUT, so the
         # bucket must allow cross-origin PUT from the SPA origin. Beta permits
-        # the local dev server; prod is the CloudFront origin (env-driven).
+        # the local dev server; prod is the frontend's real subdomain
+        # (autopa.brijeshdankhara.com, CNAME'd to Vercel -- Squarespace can't
+        # proxy a single path on the main domain, only redirect to it).
         upload_origins = os.environ.get(
             "SPA_ORIGINS",
-            "http://localhost:5173" if is_beta else "https://app.example.com",
+            "http://localhost:5173" if is_beta else "https://autopa.brijeshdankhara.com",
         ).split(",")
         self.documents_bucket = s3.Bucket(
             self,

@@ -22,9 +22,9 @@ class EdgeStack(Stack):
     Web ACL, neither of which a bare Lambda Function URL supports directly.
 
     This CloudFront distribution uses its own default domain -- it is
-    backend-only plumbing. The real public domain (e.g.
-    www.brijeshdankhara.com) is presented by Vercel, which proxies
-    /auto-pa-test/api/* to this distribution's domain.
+    backend-only plumbing. The real public domain
+    (autopa.brijeshdankhara.com) is presented by Vercel, which proxies
+    /api/* to this distribution's domain.
     """
 
     def __init__(
