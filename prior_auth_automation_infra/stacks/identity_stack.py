@@ -8,12 +8,12 @@ class IdentityStack(Stack):
     Postgres (practice_membership table), not in Cognito groups -- see
     ARCHITECTURE.md.
 
-    MFA is stage-dependent: REQUIRED in prod (PHI-grade posture, even though
-    demo data is synthetic), OPTIONAL in beta -- required TOTP enrollment
-    blocks scripted test logins, and beta exists precisely for that kind of
-    exercising. Same reasoning for the password auth flows: beta test
-    scripts authenticate with admin-set passwords; prod allows only SRP
-    (password never transits to the server).
+    MFA is optional in both stages -- this only ever holds synthetic demo
+    data, so requiring TOTP enrollment is unnecessary friction rather than
+    a real security need. The password auth flows are still stage-gated:
+    beta test scripts authenticate with admin-set passwords; prod allows
+    only SRP (password never transits to the server) -- that split is about
+    keeping scripted testing easy in beta, independent of the MFA choice.
     """
 
     def __init__(self, scope: Construct, construct_id: str, *, stage_name: str, **kwargs) -> None:
@@ -27,7 +27,7 @@ class IdentityStack(Stack):
             user_pool_name=f"prior-auth-{stage_name}",
             self_sign_up_enabled=False,
             sign_in_aliases=cognito.SignInAliases(email=True),
-            mfa=cognito.Mfa.OPTIONAL if is_beta else cognito.Mfa.REQUIRED,
+            mfa=cognito.Mfa.OPTIONAL,
             mfa_second_factor=cognito.MfaSecondFactor(otp=True, sms=False),
             password_policy=cognito.PasswordPolicy(
                 min_length=12,

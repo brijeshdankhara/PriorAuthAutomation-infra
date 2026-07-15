@@ -7,3 +7,8 @@ __pycache__
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+
+# Caches the resolved AWS account ID + AZ list -- regenerates on next
+# synth, and shouldn't be published (account ID isn't a secret per se, but
+# no reason to advertise it in a public repo).
+cdk.context.json
